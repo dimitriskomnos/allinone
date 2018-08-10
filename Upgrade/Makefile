@@ -14,7 +14,7 @@
 # 	  PySocks, transitions, smmap2, gitdb2, gitpython, python-gnupg
 #
 
-VERSION         = 0.0.0.20180809b1
+VERSION         = 0.0.0.20180811b2
 UPGRADE_SCRIPT  = CO2MPAS_AIO_UpgradePack-$(VERSION).sh
 C_NATIVE_PACKS  = co2mpas|Bottleneck|coverage|fastparquet|llvmlite|numba|numexpr|pyarrow|regex|scikit_learn|thrift|xgboost
 # 9(max): 303k(!), 5: 304, 2: 305037635, 2: 305k(!), 1(off): 305k!!
@@ -33,6 +33,7 @@ dst_wheels      := $(addprefix Packfiles/wheelhouse/,$(wheels))
 ## Archive's requirements could be a "recursive" variable,
 #  in case another rule above had created more files.
 pack_files := $(wildcard PackFiles/*)
+readme     := AIO/Packfiles/README.txt
 
 
 ## If script not ending with  a blank last line,
@@ -54,7 +55,7 @@ grep := grep
 chmod 	:= chmod
 
 .DELETE_ON_ERROR:
-.PHONY: all clean dupewheels
+.PHONY: all clean dupewheels readme
 
 all: $(UPGRADE_SCRIPT)
 
@@ -75,7 +76,10 @@ $(wheels_tstamp): wheels.list $(src_wheels) dupewheels
 	$(cp) $(src_wheels) Packfiles/wheelhouse/.
 	touch $@
 
-$(tmp_archive): $(wheels_tstamp)  $(pack_files)
+readme: ../Archive/README.txt
+	$(cp) $< $@
+
+$(tmp_archive): $(wheels_tstamp)  $(pack_files)  readme
 	$(rm) -f $@
 	$(zip)  -mx=$(ZIP_LEVEL) -myx=$(ZIP_ANALYSIS) -ms=off a $@ ./Packfiles/*  -xr!.keepme 
 
